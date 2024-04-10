@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define the structure for BST Node
+typedef struct Node {
+    int data;
+    struct Node *left, *right;
+} Node;
+
+// Function to create a new BST Node
+Node* newNode(int data) {
+    Node* node = (Node*)malloc(sizeof(Node));
+    node->data = data;
+    node->left = node->right = NULL;
+    return node;
+}
+
+// Function to find the index of value in arr[start...end]
+int search(int arr[], int start, int end, int value) {
+    int i;
+    for (i = start; i <= end; i++) {
+        if (arr[i] == value)
+            break;
+    }
+    return i;
+}
+
+// Recursive function to construct binary tree from in-order and post-order traversals
+Node* buildTree(int in[], int post[], int inStart, int inEnd, int* postIndex) {
+    if (inStart > inEnd)
+        return NULL;
+
+    // Pick current node from Postorder traversal using postIndex and decrement postIndex
+    Node* node = newNode(post[*postIndex]);
+    (*postIndex)--;
+
+    // If this node has no children then return
+    if (inStart == inEnd)
+        return node;
+
+    // Else find the index of this node in Inorder traversal
+    int inIndex = search(in, inStart, inEnd, node->data);
+
+    // Using index in Inorder traversal, construct right and left subtress
+    node->right = buildTree(in, post, inIndex + 1, inEnd, postIndex);
+    node->left = buildTree(in, post, inStart, inIndex - 1, postIndex);
+
+    return node;
+}
+
+// Function to print nodes in DFS Inorder
+void dfsInorder(Node* node) {
+    if (node == NULL)
+        return;
+
+    dfsInorder(node->left);
+    printf("%d ", node->data);
+    dfsInorder(node->right);
+}
+
+// The bst_construct() function to construct BST and return root node
+Node* bst_construct(int in[], int post[], int length) {
+    int postIndex = length - 1;
+    return buildTree(in, post, 0, length - 1, &postIndex);
+}
+
+// Driver program to test above functions
+int main() {
+    int in[] = {5, 10, 15, 20, 25, 30, 45};
+    int post[] = {5, 15, 10, 25, 45, 30, 20};
+    int length = sizeof(in) / sizeof(in[0]);
+
+    Node* root = bst_construct(in, post, length);
+
+    // Print the constructed BST in DFS Inorder
+    printf("DFS Inorder traversal of the constructed BST is: \n");
+    dfsInorder(root);
+
+    return 0;
+}
